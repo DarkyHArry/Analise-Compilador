@@ -1,0 +1,58 @@
+int main(){
+
+}
+	push rbp	; Salva o rbp na pilha, já que rbp vive mudando de valor
+	mov rbp, rsp	; cópia o valor de rsp dentro de rbp
+	sub rsp, 16	; reserva 16 bytes na pilha, as variavéis
+
+chamando a primeira string
+	
+	mov edi, OFFSET FLAT:.LC0
+	mov eax, 0	; aqui ele zera o eax para avisar que não precisa mexer no xmm
+	call printf
+
+lendo o primeiro dado númerico
+
+	lea rax, [rbp-8] ; aqui vai ate o endereço da memória do rbp e coloca o valor no rax
+	mov rsi, rax	 ; adiciona rax em rsi
+	mov edi, OFFSET FLAT:.LC1  	; recebe o endereço da string
+	mov eax, 0
+	call __isoc99_scanf
+
+imprimindo a segunda string e lendo dado
+	
+	mov     edi, OFFSET FLAT:.LC2	; printf
+        mov     eax, 0			; zera o eax
+        call    printf			; chama o printf
+        lea     rax, [rbp-12]		; vai no endereço da memória e coloca o valor no rax
+        mov     rsi, rax		; move rax para rsi
+        mov     edi, OFFSET FLAT:.LC1	; recebe o endereço da string
+        mov     eax, 0			; zera eax
+        call    __isoc99_scanf		
+
+fazendo o cálculo
+
+	movss xmm1, DWORD PTR [rbp-8] ; valor de rbp-8 no xmm1
+	movss xmm0, DWORD PTR [rbp-12] ; valor de rbp-12 no xmm0
+	addss xmm0, xmm1 ; a soma entre os valores passados no scanf e armazenados
+	movss   DWORD PTR [rbp-4], xmm0 ; rbp-4 a variavél que recebe o resultado armazenado de xmm0
+
+imprimir a variavél com a soma no printf
+
+	pxor xmm2, xmm2 ; limpa o xmm2 para garantir segurança e performance
+	cvtss2sd xmm2, DWORD PTR [rbp-4] ; aqui ele adiciona a variavél soma em xmm2. de float para double em 64 bits
+	movq rax, xmm2 ; move xmm2 para rax de 64 bits claro
+	movq xmm0, rax ; depois move rax para xmm0 ( por regra deve ser assim )
+	mov edi, OFFSER FLAT:.LC3 ; aqui é a string
+	mov eax, 1 ; existe 1 argumento em xmm0 (variavél)
+	call printf
+
+se menor que 10 e imprimi mensagem se maior ou igual
+
+	movss xmm0, DWORD PTR [rbp-4]	 ; lê a memória para a comparação
+	comiss xmm0, DWORD PTR .lC4[rip] ; compara a variavél
+	jb .L7 				 ; pula somente se for menor que 10
+	 mov     edi, OFFSET FLAT:.LC5   ; move a string para edi
+        call    puts
+        jmp     .L4			 ; sai da instrução.
+	
